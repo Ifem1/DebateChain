@@ -20,27 +20,27 @@ export const DEBATE_STATUS_LABELS: Record<string, string> = {
 };
 
 export const DEBATE_STATUS_COLORS: Record<string, string> = {
-  CREATED: 'rgba(37,99,235,0.15)',
-  ACCEPTED: 'rgba(34,211,238,0.15)',
-  OPENING_SUBMITTED: 'rgba(34,211,238,0.15)',
-  REBUTTAL_SUBMITTED: 'rgba(245,197,66,0.15)',
-  READY_FOR_JUDGEMENT: 'rgba(245,197,66,0.2)',
-  JUDGED: 'rgba(245,197,66,0.2)',
-  DISPUTED: 'rgba(225,29,72,0.15)',
-  FINALIZED: 'rgba(34,197,94,0.15)',
-  CANCELLED: 'rgba(100,116,139,0.15)',
+  CREATED: 'rgba(239,138,255,0.1)',
+  ACCEPTED: 'rgba(239,138,255,0.14)',
+  OPENING_SUBMITTED: 'rgba(191,90,242,0.14)',
+  REBUTTAL_SUBMITTED: 'rgba(217,70,239,0.14)',
+  READY_FOR_JUDGEMENT: 'rgba(239,138,255,0.18)',
+  JUDGED: 'rgba(239,138,255,0.18)',
+  DISPUTED: 'rgba(248,113,113,0.14)',
+  FINALIZED: 'rgba(74,222,128,0.1)',
+  CANCELLED: 'rgba(100,100,120,0.12)',
 };
 
 export const DEBATE_STATUS_TEXT: Record<string, string> = {
-  CREATED: '#3b82f6',
-  ACCEPTED: '#22D3EE',
-  OPENING_SUBMITTED: '#22D3EE',
-  REBUTTAL_SUBMITTED: '#F5C542',
-  READY_FOR_JUDGEMENT: '#F5C542',
-  JUDGED: '#F5C542',
-  DISPUTED: '#E11D48',
-  FINALIZED: '#22c55e',
-  CANCELLED: '#64748b',
+  CREATED: '#ef8aff',
+  ACCEPTED: '#ef8aff',
+  OPENING_SUBMITTED: '#bf5af2',
+  REBUTTAL_SUBMITTED: '#d946ef',
+  READY_FOR_JUDGEMENT: '#ef8aff',
+  JUDGED: '#ef8aff',
+  DISPUTED: '#f87171',
+  FINALIZED: '#4ade80',
+  CANCELLED: '#7a6490',
 };
 
 export const FALLACY_DESCRIPTIONS: Record<string, string> = {
