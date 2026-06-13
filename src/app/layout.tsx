@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   title: "DebateChain — On-Chain AI-Judged Debates",
   description:
     "A reasoning contest protocol. Arguments, evidence and verdicts stored on-chain, judged by GenLayer AI.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
   openGraph: {
     title: "DebateChain",
     description: "Win debates by reasoning better, not by shouting louder.",

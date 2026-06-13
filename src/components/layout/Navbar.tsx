@@ -38,21 +38,13 @@ export function Navbar() {
 
         {/* Logo */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
-          <div style={{
-            width: 34,
-            height: 34,
-            borderRadius: 10,
-            background: 'linear-gradient(135deg, #ef8aff, #bf5af2)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 16,
-            fontWeight: 900,
-            color: '#07070f',
-            boxShadow: '0 0 16px rgba(239,138,255,0.4)',
-          }}>
-            ⚔
-          </div>
+          <img
+            src="/favicon.svg"
+            alt="DebateChain logo"
+            width={34}
+            height={34}
+            style={{ borderRadius: 8, boxShadow: '0 0 14px rgba(239,138,255,0.35)' }}
+          />
           <span style={{ fontSize: 17, fontWeight: 800, color: '#f5eeff', letterSpacing: '-0.02em' }}>
             DebateChain
           </span>

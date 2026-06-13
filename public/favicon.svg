@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="30" fill="#07070f"/>
+  <circle cx="32" cy="32" r="30" fill="none" stroke="#ef8aff" stroke-width="1" opacity="0.3"/>
+  <path fill-rule="evenodd" fill="#111128" stroke="#ef8aff" stroke-width="1.2" stroke-linejoin="round"
+    d="M 10,11 H 24 A 16,15.5 0 0 1 24,53 H 10 Z
+       M 18,17 H 23 A 10.5,10 0 0 1 23,47 H 18 Z"/>
+  <g transform="translate(27,19) rotate(-41)">
+    <polygon points="0,-18 -1.8,5 1.8,5" fill="#ef8aff"/>
+    <path d="M -5,4 L 5,4 L 4.2,8 L -4.2,8 Z" fill="#ef8aff"/>
+    <rect x="-1.8" y="8" width="3.6" height="11" rx="1" fill="#5a1e8a"/>
+    <ellipse cx="0" cy="21" rx="2.8" ry="2.2" fill="#ef8aff"/>
+  </g>
+  <g transform="translate(27,19) rotate(41)">
+    <polygon points="0,-18 -1.8,5 1.8,5" fill="#ef8aff"/>
+    <path d="M -5,4 L 5,4 L 4.2,8 L -4.2,8 Z" fill="#ef8aff"/>
+    <rect x="-1.8" y="8" width="3.6" height="11" rx="1" fill="#5a1e8a"/>
+    <ellipse cx="0" cy="21" rx="2.8" ry="2.2" fill="#ef8aff"/>
+  </g>
+  <polygon points="27,15 29,18 27,21 25,18" fill="white" opacity="0.8"/>
+</svg>
