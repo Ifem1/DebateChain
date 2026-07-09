@@ -5,9 +5,9 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
-  title: "DebateChain — On-Chain AI-Judged Debates",
+  title: "DebateChain - On-Chain AI-Judged Debates",
   description:
-    "A reasoning contest protocol. Arguments, evidence and verdicts stored on-chain, judged by GenLayer AI.",
+    "A reasoning contest protocol. Arguments, submitted evidence and verdicts stored on-chain, judged by GenLayer AI.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",

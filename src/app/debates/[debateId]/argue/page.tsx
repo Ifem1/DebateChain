@@ -56,7 +56,9 @@ export default function ArguePage() {
     }
   }, [debateId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    void Promise.resolve().then(() => load());
+  }, [load]);
 
   if (!isConnected) {
     return (

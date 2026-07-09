@@ -21,15 +21,12 @@ const WalletContext = createContext<WalletContextType>({
 });
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  const [address, setAddress] = useState<`0x${string}` | null>(null);
+  const [address, setAddress] = useState<`0x${string}` | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return sessionStorage.getItem('dc_wallet') as `0x${string}` | null;
+  });
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Restore from session
-  useEffect(() => {
-    const saved = sessionStorage.getItem('dc_wallet');
-    if (saved) setAddress(saved as `0x${string}`);
-  }, []);
 
   const connect = useCallback(async () => {
     setIsConnecting(true);

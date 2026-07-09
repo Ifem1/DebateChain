@@ -1,5 +1,4 @@
 import type { Verdict } from '@/types/debate';
-import { SCORING_RUBRIC } from '@/lib/constants';
 
 interface Props {
   verdict: Verdict;

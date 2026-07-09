@@ -40,7 +40,7 @@ function FallacyItem({ f }: { f: FallacyDetection }) {
             marginTop: 2,
           }}
         >
-          "{f.excerpt}"
+          &quot;{f.excerpt}&quot;
         </span>
       )}
       {desc && !f.description && (

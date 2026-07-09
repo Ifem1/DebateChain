@@ -131,7 +131,7 @@ export function ArgumentComposer({ side, sideLabel, round, wordLimit, onSubmit, 
             color: '#94a3b8',
           }}
         >
-          ⚖️ GenLayer will evaluate argument quality, detect logical fallacies, and assess evidence. Your argument is stored on-chain.
+          ⚖️ GenLayer will evaluate argument quality, flag logical fallacies, and assess evidence details with contract-side fetches when available. Your argument is stored on-chain.
         </div>
 
         {error && (

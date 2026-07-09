@@ -57,7 +57,6 @@ async function run() {
   // ── 4. Check user_debates for creator ────────────────────────────────────
   section('1.4 get_user_debates — creator sees debate');
   const creatorDebates = await view(creator, 'get_user_debates', [creatorAddr]);
-  const found = Array.isArray(creatorDebates) && creatorDebates.some(d => d.debate_id === debateId || d.topic);
   log(`creator debate list length: ${Array.isArray(creatorDebates) ? creatorDebates.length : 'n/a'}`);
   // debate_id may not be stored directly in the object — check topic
   const match = Array.isArray(creatorDebates) && creatorDebates.find(d => d.topic === 'AI will be net positive for employment');

@@ -109,7 +109,9 @@ export default function DebateRoomPage() {
   }, [debateId]);
 
   // Initial load
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    void Promise.resolve().then(() => load());
+  }, [load]);
 
   // Auto-dismiss tx pending banner after 90s
   useEffect(() => {
@@ -119,15 +121,17 @@ export default function DebateRoomPage() {
   }, [txPending]);
 
   // Auto-poll while debate is active
+  const debateStatus = debate?.status;
+
   useEffect(() => {
-    if (!debate) return;
-    if (!ACTIVE_STATUSES.has(debate.status)) {
+    if (!debateStatus) return;
+    if (!ACTIVE_STATUSES.has(debateStatus)) {
       if (intervalRef.current) clearInterval(intervalRef.current);
       return;
     }
     intervalRef.current = setInterval(() => load(true), 8000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [debate?.status, load]);
+  }, [debateStatus, load]);
 
   const isCreator = address?.toLowerCase() === debate?.creator.toLowerCase();
   const isOpponent = address?.toLowerCase() === debate?.opponent.toLowerCase();

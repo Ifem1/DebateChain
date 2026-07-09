@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useWallet } from '@/providers/WalletProvider';
 import { WalletConnectButton } from '@/components/ui/WalletConnectButton';
@@ -38,7 +39,7 @@ export function Navbar() {
 
         {/* Logo */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
-          <img
+          <Image
             src="/favicon.svg"
             alt="DebateChain logo"
             width={34}

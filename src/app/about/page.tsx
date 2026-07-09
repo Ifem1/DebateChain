@@ -91,7 +91,7 @@ export default function AboutPage() {
           Fallacy Detection
         </h2>
         <p style={{ fontSize: 15, color: '#7a6490', lineHeight: 1.75, marginBottom: 20 }}>
-          The AI judge identifies specific logical fallacies — not just "weak argument" but exactly what went wrong.
+          The AI judge identifies specific logical fallacies — not just &quot;weak argument&quot; but exactly what went wrong.
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {FALLACIES.map((f) => (
@@ -143,7 +143,8 @@ export default function AboutPage() {
             'Supabase only caches on-chain data — it never decides results.',
             'Contract calls (not token transfers) are used for all write actions.',
             'Fallacies are identified specifically, not generically.',
-            'Evidence is evaluated for relevance, not just existence.',
+            'Submitted evidence is evaluated for relevance, not just existence.',
+            'Evidence URLs are fetched contract-side when available and judged from stable excerpts.',
           ].map((r) => (
             <div key={r} style={{
               display: 'flex', alignItems: 'flex-start', gap: 10,

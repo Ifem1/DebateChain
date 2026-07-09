@@ -15,7 +15,7 @@
  *   PK_JOINER_1   — 64-hex private key for joiner wallet 1
  *   PK_JOINER_2   — 64-hex private key for joiner wallet 2
  *
- * Contract: 0x0491076e147e51fDC75B16Bb3C63E46001faC07f
+ * Contract: 0x76Fc09C802f532Db67Ea0Da4DdA060fc38825456
  * Chain   : GenLayer Studionet (chainId 61999)
  */
 

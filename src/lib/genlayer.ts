@@ -4,7 +4,7 @@ import { createClient } from 'genlayer-js';
 import { studionet } from 'genlayer-js/chains';
 import { getAddress } from 'viem';
 import { CONTRACT_ADDRESS } from './constants';
-import { cacheDebate, cacheSubmission, cacheVerdict } from './supabase';
+import { cacheDebate, cacheProfile, cacheSubmission, cacheVerdict } from './supabase';
 import type {
   Debate,
   Submission,
@@ -144,7 +144,9 @@ export async function getReputation(address: string): Promise<UserReputation | n
     });
     if (!result) return null;
     const raw = typeof result === 'string' ? JSON.parse(result) : result;
-    return raw as UserReputation;
+    const reputation = raw as UserReputation;
+    cacheProfile(reputation).catch(() => {});
+    return reputation;
   } catch (err) {
     console.error('getReputation error:', err);
     return null;

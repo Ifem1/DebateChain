@@ -56,7 +56,9 @@ export default function DebatesPage() {
     }
   }, [address]);
 
-  useEffect(() => { loadAll(); }, [loadAll]);
+  useEffect(() => {
+    void Promise.resolve().then(() => loadAll());
+  }, [loadAll]);
 
   const debates = view === 'all' ? allDebates : myDebates;
 

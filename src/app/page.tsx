@@ -4,7 +4,7 @@ const FEATURES = [
   {
     icon: '⚖️',
     title: 'AI-Judged Verdicts',
-    desc: 'GenLayer evaluates argument quality, detects logical fallacies, and scores evidence — all on-chain with consensus.',
+    desc: 'GenLayer evaluates argument quality, flags logical fallacies, and scores submitted evidence — all on-chain with consensus.',
     accent: '#ef8aff',
   },
   {
@@ -16,13 +16,13 @@ const FEATURES = [
   {
     icon: '⚡',
     title: 'Fallacy Detection',
-    desc: 'Strawman, ad hominem, circular reasoning — the AI judge identifies every flaw in real-time.',
+    desc: 'Strawman, ad hominem, circular reasoning — the AI judge highlights specific reasoning flaws for review.',
     accent: '#ff6ef7',
   },
   {
     icon: '📊',
     title: 'Evidence Assessment',
-    desc: 'The judge evaluates whether your evidence actually supports your claims, not just whether a link exists.',
+    desc: 'The judge checks submitted source details and contract-fetched excerpts, not just whether a link exists.',
     accent: '#d946ef',
   },
 ];
@@ -110,7 +110,7 @@ export default function HomePage() {
                 margin: '0 0 36px',
                 maxWidth: 480,
               }}>
-                DebateChain is a decentralized proving ground. Arguments are timestamped, evidence is verified, and AI consensus decides the victor — on-chain, forever.
+                DebateChain is a decentralized proving ground. Arguments are timestamped, evidence URLs are checked when available, and AI consensus decides the victor — on-chain, forever.
               </p>
 
               <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 48 }}>

@@ -71,7 +71,9 @@ export default function VerdictPage() {
     }
   }, [debateId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    void Promise.resolve().then(() => load());
+  }, [load]);
 
   if (loading) {
     return (

@@ -67,7 +67,7 @@ export function EvidenceInput({ value, onChange, maxItems = 5 }: Props) {
               Evidence & Sources
             </span>
             <span style={{ fontSize: 11, color: '#475569' }}>
-              GenLayer will assess relevance and support quality
+              GenLayer will assess source details and fetched excerpts when available
             </span>
           </div>
 

@@ -21,12 +21,10 @@ import {
 checkEnvVars();
 
 const c1Acc  = makeAccount('PK_CREATOR_1');
-const c2Acc  = makeAccount('PK_CREATOR_2');
 const j1Acc  = makeAccount('PK_JOINER_1');
 const j2Acc  = makeAccount('PK_JOINER_2');
 
 const c1 = makeClient(c1Acc);   // creator / SIDE_A
-const c2 = makeClient(c2Acc);   // second creator (not a participant in c1's debate)
 const j1 = makeClient(j1Acc);   // joiner / SIDE_B
 const j2 = makeClient(j2Acc);   // outsider
 

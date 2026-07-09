@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function JoinDebatePanel({ debate, onJoined }: Props) {
-  const { address, isConnected, connect } = useWallet();
+  const { address, connect } = useWallet();
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);

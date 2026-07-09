@@ -5,10 +5,10 @@ import Link from 'next/link';
 
 interface Props {
   debates: Debate[];
-  address: string;
+  address?: string;
 }
 
-export function UserDebateHistory({ debates, address }: Props) {
+export function UserDebateHistory({ debates }: Props) {
   if (!debates.length) {
     return (
       <EmptyState

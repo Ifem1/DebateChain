@@ -240,11 +240,11 @@ class DebateChain(gl.Contract):
             for s in subs:
                 ev = s.get("evidence", [])
                 ev_text = (
-                    "Evidence provided: " + "; ".join(
-                        f"{e.get('title', '')}: {e.get('note', '')}"
-                        for e in ev
+                    "Evidence submitted: " + "; ".join(
+                        self._format_evidence_item(e, i)
+                        for i, e in enumerate(ev[:3])
                     )
-                    if ev else "No evidence provided."
+                    if ev else "No evidence submitted."
                 )
                 parts.append(f"[{s['round'].upper()}]\n{s['argument_text']}\n{ev_text}")
             return "\n\n".join(parts)
@@ -266,7 +266,7 @@ EVIDENCE REQUIRED: {evidence_required}
 
 SCORING RUBRIC (score each 0-100):
 - Argument Strength 30%: logical structure, relevance, clear claim, supported reasoning
-- Evidence Quality 25%: quality, relevance, credibility; penalise heavily if evidence_required=true and none provided
+- Evidence Quality 25%: quality, relevance, credibility; penalise heavily if evidence_required=true and none submitted
 - Rebuttal Quality 20%: how directly the debater engages the opponent's strongest points
 - Fallacy Penalty 15%: deduct for strawman, ad hominem, false dilemma, circular reasoning, slippery slope, hasty generalisation, appeal to emotion, appeal to authority without evidence, whataboutism, red herring, unsupported claim
 - Clarity and Focus 10%: readability, topic discipline, concise expression
@@ -276,7 +276,7 @@ JUDGEMENT RULES:
 - Do NOT reward the longest answer. Quality over quantity.
 - Do NOT reward insults or emotional manipulation.
 - Identify SPECIFIC fallacies by type with a short description and excerpt.
-- Evaluate whether evidence actually supports the claim, not just whether a link exists.
+- Evaluate whether submitted evidence titles, notes, URLs, and fetched excerpts support the claim. Do not assume a URL proves a fact if the fetched excerpt is unavailable or irrelevant.
 - If both sides are weak or unclear, return DRAW or INSUFFICIENT_ARGUMENTS.
 - Reward direct rebuttal of the opponent's strongest claim.
 - Explain WHY the winner won with specific references.
@@ -341,9 +341,7 @@ Return ONLY this JSON object:
                 "judge_notice": "JSON parse error in AI response.",
             }
 
-        valid_winners = {"SIDE_A", "SIDE_B", "DRAW", "INSUFFICIENT_ARGUMENTS", "AMBIGUOUS"}
-        if verdict.get("winner") not in valid_winners:
-            verdict["winner"] = "DRAW"
+        verdict = self._sanitize_verdict(verdict)
 
         verdict["debate_id"] = debate_id
 
@@ -456,6 +454,112 @@ Return ONLY this JSON object:
             if raw:
                 result.append(json.loads(raw))
         return result
+
+    def _format_evidence_item(self, item: dict, index: int) -> str:
+        title = str(item.get("title") or "")[:200]
+        url = str(item.get("url") or "")[:500]
+        note = str(item.get("note") or "")[:500]
+        fetched = self._fetch_evidence_excerpt(url)
+        return (
+            f"evidence_{index + 1}: "
+            f"title={title}; "
+            f"url={url}; "
+            f"claim_support_note={note}; "
+            f"contract_fetched_excerpt={fetched}"
+        )
+
+    def _fetch_evidence_excerpt(self, url: str) -> str:
+        if not url:
+            return "no_url_submitted"
+        if not (url.startswith("https://") or url.startswith("http://")):
+            return "invalid_url_scheme"
+
+        def fetch_page():
+            html = gl.nondet.web.render(url, mode="html")
+            return str(html)[:1500]
+
+        try:
+            return gl.eq_principle.strict_eq(fetch_page)
+        except Exception as err:
+            return "fetch_unavailable: " + str(err)[:200]
+
+    def _sanitize_verdict(self, verdict: dict) -> dict:
+        valid_winners = {"SIDE_A", "SIDE_B", "DRAW", "INSUFFICIENT_ARGUMENTS", "AMBIGUOUS"}
+        if verdict.get("winner") not in valid_winners:
+            verdict["winner"] = "DRAW"
+
+        verdict["confidence"] = self._score(verdict.get("confidence"), 0.0, 0.0, 1.0)
+        verdict["side_a_score"] = self._score(verdict.get("side_a_score"), 50, 0, 100)
+        verdict["side_b_score"] = self._score(verdict.get("side_b_score"), 50, 0, 100)
+
+        for key in ("argument_strength", "evidence_quality", "rebuttal_quality"):
+            raw = verdict.get(key)
+            if not isinstance(raw, dict):
+                raw = {}
+            verdict[key] = {
+                "side_a": self._score(raw.get("side_a"), 0, 0, 100),
+                "side_b": self._score(raw.get("side_b"), 0, 0, 100),
+            }
+
+        fallacies = verdict.get("fallacies")
+        if not isinstance(fallacies, dict):
+            fallacies = {}
+        verdict["fallacies"] = {
+            "side_a": self._sanitize_fallacies(fallacies.get("side_a")),
+            "side_b": self._sanitize_fallacies(fallacies.get("side_b")),
+        }
+
+        notes = verdict.get("improvement_notes")
+        if not isinstance(notes, dict):
+            notes = {}
+        verdict["improvement_notes"] = {
+            "side_a": self._string_list(notes.get("side_a")),
+            "side_b": self._string_list(notes.get("side_b")),
+        }
+
+        for key in (
+            "key_reasoning",
+            "evidence_assessment",
+            "final_summary",
+            "judge_notice",
+        ):
+            verdict[key] = str(verdict.get(key) or "")
+
+        verdict["strongest_points_a"] = self._string_list(verdict.get("strongest_points_a"))
+        verdict["strongest_points_b"] = self._string_list(verdict.get("strongest_points_b"))
+        return verdict
+
+    def _score(self, value, default, low, high):
+        try:
+            number = float(value)
+        except Exception:
+            number = float(default)
+        if number < low:
+            number = float(low)
+        if number > high:
+            number = float(high)
+        if isinstance(default, int):
+            return int(number)
+        return number
+
+    def _string_list(self, value) -> list:
+        if not isinstance(value, list):
+            return []
+        return [str(v)[:500] for v in value[:10]]
+
+    def _sanitize_fallacies(self, value) -> list:
+        if not isinstance(value, list):
+            return []
+        cleaned = []
+        for item in value[:20]:
+            if not isinstance(item, dict):
+                continue
+            cleaned.append({
+                "type": str(item.get("type") or "unspecified")[:80],
+                "description": str(item.get("description") or "")[:500],
+                "excerpt": str(item.get("excerpt") or "")[:300],
+            })
+        return cleaned
 
     def _update_reputation(self, debate: dict, verdict: dict) -> None:
         creator = debate.get("creator")

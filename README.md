@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DebateChain
 
-## Getting Started
+DebateChain is a GenLayer-based debate protocol where two wallets commit to opposing sides, submit structured rounds, and ask an Intelligent Contract to produce an on-chain verdict using a fixed rubric.
 
-First, run the development server:
+The project is intentionally one focused product, not a collection of small demos. GenLayer is used where consensus matters: a disputed, reputation-forming judgement between two participants.
+
+## Why GenLayer
+
+DebateChain is not an off-chain advice app. The contract is the source of truth for:
+
+- debate creation and side ownership
+- accepted opponents
+- submitted opening, rebuttal, and final rounds
+- AI validator judgement
+- verdict storage
+- participant reputation updates
+
+Supabase is used only as a public index/cache for faster browsing. It must never decide winners or mutate verdicts.
+
+## Current Evidence Model
+
+Participants can submit evidence titles, URLs, and support notes. During `judge_debate`, the contract attempts to fetch up to three evidence URLs per submission using GenLayer web access and includes stable fetched excerpts in the judge prompt.
+
+If a URL is missing, invalid, unreachable, or too dynamic for consensus, the verdict must treat that evidence as unavailable rather than assume the claim is proven. The app still uses careful wording: evidence is assessed against submitted and fetched details, not blindly declared true.
+
+## Contract
+
+- Contract source: `contract/debate_chain.py`
+- Default deployed Studionet contract used by tests: `0x76Fc09C802f532Db67Ea0Da4DdA060fc38825456`
+- Frontend contract address is configured with `NEXT_PUBLIC_CONTRACT_ADDRESS`
+
+Main write methods:
+
+- `create_debate(debate_id, debate_json)`
+- `accept_debate(debate_id)`
+- `submit_opening(debate_id, side, submission_id, content_json)`
+- `submit_rebuttal(debate_id, side, submission_id, content_json)`
+- `submit_final_statement(debate_id, side, submission_id, content_json)`
+- `judge_debate(debate_id)`
+- `dispute_verdict(debate_id, dispute_id, dispute_json)`
+- `finalize_debate(debate_id)`
+
+## App Stack
+
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- GenLayer JS SDK
+- Supabase cache/index tables
+
+## Local Setup
 
 ```bash
+npm install
+cp .env.local.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Required frontend environment:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x...
+NEXT_PUBLIC_GENLAYER_RPC=https://studio.genlayer.com/api
+NEXT_PUBLIC_GENLAYER_EXPLORER=https://explorer-studio.genlayer.com
+```
 
-## Learn More
+Optional Supabase cache:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://yourproject.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Apply the schema in `supabase/schema.sql` if using Supabase.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tests
 
-## Deploy on Vercel
+The e2e tests use real GenLayer wallets from environment variables. Private keys are never hardcoded.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+$env:PK_CREATOR_1="0x..."
+$env:PK_CREATOR_2="0x..."
+$env:PK_JOINER_1="0x..."
+$env:PK_JOINER_2="0x..."
+$env:CONTRACT_ADDRESS="0x..."
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+node test-all.mjs 1
+node test-all.mjs 2
+node test-all.mjs 3
+```
+
+Suite 1 covers the deterministic happy path through `READY_FOR_JUDGEMENT`.
+Suite 2 covers revert/error cases.
+Suite 3 runs non-deterministic `judge_debate`, then dispute and finalize flows.
+
+## Submission Notes
+
+For reviewer clarity, submit the full repository with:
+
+- the contract source
+- frontend source
+- Supabase schema
+- test runner and suites
+- deployment/config instructions
+
+Do not submit only a live app link.

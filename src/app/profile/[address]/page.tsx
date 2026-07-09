@@ -54,7 +54,9 @@ export default function ProfilePage() {
     }
   }, [address]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    void Promise.resolve().then(() => load());
+  }, [load]);
 
   if (loading) {
     return (
