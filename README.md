@@ -81,7 +81,6 @@ The e2e tests use real GenLayer wallets from environment variables. Private keys
 
 ```bash
 $env:PK_CREATOR_1="0x..."
-$env:PK_CREATOR_2="0x..."
 $env:PK_JOINER_1="0x..."
 $env:PK_JOINER_2="0x..."
 $env:CONTRACT_ADDRESS="0x..."

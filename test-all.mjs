@@ -11,7 +11,6 @@
  *
  * Required env vars (set before running — NEVER hardcoded):
  *   PK_CREATOR_1  — 64-hex private key for debate creator wallet 1
- *   PK_CREATOR_2  — 64-hex private key for debate creator wallet 2
  *   PK_JOINER_1   — 64-hex private key for joiner wallet 1
  *   PK_JOINER_2   — 64-hex private key for joiner wallet 2
  *

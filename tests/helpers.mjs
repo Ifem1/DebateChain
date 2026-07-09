@@ -19,7 +19,7 @@ export const CONTRACT = process.env.CONTRACT_ADDRESS
 
 // ─── Env-var guard ────────────────────────────────────────────────────────────
 
-const REQUIRED_KEYS = ['PK_CREATOR_1', 'PK_CREATOR_2', 'PK_JOINER_1', 'PK_JOINER_2'];
+const REQUIRED_KEYS = ['PK_CREATOR_1', 'PK_JOINER_1', 'PK_JOINER_2'];
 
 export function checkEnvVars() {
   const missing = REQUIRED_KEYS.filter((k) => !process.env[k]);
