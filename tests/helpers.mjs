@@ -15,7 +15,7 @@ const studionet = chains.studionet;
 
 export const CONTRACT = process.env.CONTRACT_ADDRESS
   || process.env.NEXT_PUBLIC_CONTRACT_ADDRESS
-  || '0x76Fc09C802f532Db67Ea0Da4DdA060fc38825456';
+  || '0x14DC134B6E817195D7c8111A25c5dBD4d43905D8';
 
 // ─── Env-var guard ────────────────────────────────────────────────────────────
 

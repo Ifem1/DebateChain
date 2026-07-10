@@ -1,6 +1,5 @@
-# DebateChain — GenLayer Intelligent Contract
-# AI-judged debate platform. GenLayer is the source of truth.
-# Deploy on GenLayer Studionet.
+# v0.2.20
+# { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
 
 from genlayer import *
 import json
@@ -284,7 +283,7 @@ JUDGEMENT RULES:
 Return ONLY this JSON object:
 {{
   "winner": "SIDE_A or SIDE_B or DRAW or INSUFFICIENT_ARGUMENTS",
-  "confidence": 0.0,
+  "confidence": 0,
   "side_a_score": 0,
   "side_b_score": 0,
   "argument_strength": {{"side_a": 0, "side_b": 0}},
@@ -304,7 +303,7 @@ Return ONLY this JSON object:
 }}"""
 
         result = gl.eq_principle.prompt_non_comparative(
-            lambda: prompt,
+            input=prompt,
             task="Judge a structured debate between two participants and return a verdict JSON with winner, scores, fallacies, and reasoning.",
             criteria="The verdict must be fair, evidence-based, and identify specific logical fallacies. It must return strict JSON only."
         )
@@ -325,7 +324,7 @@ Return ONLY this JSON object:
         except Exception:
             verdict = {
                 "winner": "DRAW",
-                "confidence": 0.0,
+                "confidence": 0,
                 "side_a_score": 50,
                 "side_b_score": 50,
                 "argument_strength": {"side_a": 50, "side_b": 50},
@@ -488,7 +487,7 @@ Return ONLY this JSON object:
         if verdict.get("winner") not in valid_winners:
             verdict["winner"] = "DRAW"
 
-        verdict["confidence"] = self._score(verdict.get("confidence"), 0.0, 0.0, 1.0)
+        verdict["confidence"] = self._confidence_pct(verdict.get("confidence"))
         verdict["side_a_score"] = self._score(verdict.get("side_a_score"), 50, 0, 100)
         verdict["side_b_score"] = self._score(verdict.get("side_b_score"), 50, 0, 100)
 
@@ -529,17 +528,73 @@ Return ONLY this JSON object:
         verdict["strongest_points_b"] = self._string_list(verdict.get("strongest_points_b"))
         return verdict
 
+    def _to_int(self, value) -> int:
+        if isinstance(value, bool):
+            return int(value)
+        if isinstance(value, int):
+            return value
+        text = str(value).strip()
+        if not text:
+            raise ValueError("empty numeric value")
+        neg = text.startswith("-")
+        if neg:
+            text = text[1:]
+        digits = ""
+        for ch in text:
+            if ch.isdigit():
+                digits += ch
+            elif ch == ".":
+                break
+            else:
+                raise ValueError("non-numeric value")
+        if not digits:
+            raise ValueError("no digits in value")
+        number = int(digits)
+        return -number if neg else number
+
     def _score(self, value, default, low, high):
         try:
-            number = float(value)
+            number = self._to_int(value)
         except Exception:
-            number = float(default)
+            number = default
         if number < low:
-            number = float(low)
+            number = low
         if number > high:
-            number = float(high)
-        if isinstance(default, int):
-            return int(number)
+            number = high
+        return number
+
+    def _confidence_pct(self, value) -> int:
+        # confidence is expressed on a 0-100 integer scale (percent) since
+        # GenVM disallows floats. Values already given as 0-100 pass through;
+        # values given as a 0-1 fraction like "0.85" are scaled to 85.
+        try:
+            text = str(value).strip()
+            if not text:
+                raise ValueError("empty")
+            neg = text.startswith("-")
+            if neg:
+                text = text[1:]
+            if "." in text:
+                whole, frac = text.split(".", 1)
+            else:
+                whole, frac = text, ""
+            whole_digits = "".join(ch for ch in whole if ch.isdigit()) or "0"
+            frac_digits = "".join(ch for ch in frac if ch.isdigit())
+            whole_n = int(whole_digits)
+            if whole_n == 0 and frac_digits:
+                # fractional value like 0.85 -> scale to percent using first two decimals
+                frac_digits = (frac_digits + "00")[:2]
+                number = int(frac_digits)
+            else:
+                number = whole_n
+            if neg:
+                number = 0
+        except Exception:
+            number = 0
+        if number < 0:
+            number = 0
+        if number > 100:
+            number = 100
         return number
 
     def _string_list(self, value) -> list:
@@ -589,12 +644,13 @@ Return ONLY this JSON object:
             arg_score = verdict.get("argument_strength", {}).get(fallacy_key, 0)
             total = rep["debates_total"]
             prev_avg = rep.get("argument_strength_avg", 0)
-            rep["argument_strength_avg"] = ((prev_avg * (total - 1)) + arg_score) / total
+            rep["argument_strength_avg"] = ((prev_avg * (total - 1)) + arg_score) // total
 
             ev_score = verdict.get("evidence_quality", {}).get(fallacy_key, 0)
             prev_ev = rep.get("evidence_quality_avg", 0)
-            rep["evidence_quality_avg"] = ((prev_ev * (total - 1)) + ev_score) / total
+            rep["evidence_quality_avg"] = ((prev_ev * (total - 1)) + ev_score) // total
 
-            rep["win_rate"] = rep.get("wins", 0) / total
+            # win_rate is an integer percentage (0-100), not a float fraction
+            rep["win_rate"] = (rep.get("wins", 0) * 100) // total
 
             self.reputation[addr] = json.dumps(rep)

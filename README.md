@@ -26,7 +26,7 @@ If a URL is missing, invalid, unreachable, or too dynamic for consensus, the ver
 ## Contract
 
 - Contract source: `contract/debate_chain.py`
-- Default deployed Studionet contract used by tests: `0x76Fc09C802f532Db67Ea0Da4DdA060fc38825456`
+- Default deployed Studionet contract used by tests: `0x14DC134B6E817195D7c8111A25c5dBD4d43905D8`
 - Frontend contract address is configured with `NEXT_PUBLIC_CONTRACT_ADDRESS`
 
 Main write methods:
