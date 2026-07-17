@@ -4,7 +4,6 @@ import { createClient } from 'genlayer-js';
 import { studionet } from 'genlayer-js/chains';
 import { getAddress } from 'viem';
 import { CONTRACT_ADDRESS } from './constants';
-import { cacheDebate, cacheProfile, cacheSubmission, cacheVerdict } from './supabase';
 import type {
   Debate,
   Submission,
@@ -40,8 +39,6 @@ export async function getDebate(debateId: string): Promise<Debate | null> {
     if (!result) return null;
     const raw = typeof result === 'string' ? JSON.parse(result) : result;
     const debate = raw as Debate;
-    // Sync to Supabase cache in the background — non-blocking
-    cacheDebate(debate).catch(() => {});
     return debate;
   } catch (err) {
     console.error('getDebate error:', err);
@@ -78,7 +75,6 @@ export async function getDebateSubmissions(debateId: string): Promise<Submission
     const raw = typeof result === 'string' ? JSON.parse(result) : result;
     const subs: Submission[] = Array.isArray(raw) ? raw : [];
     // Cache each submission in background
-    subs.forEach((s) => cacheSubmission(s).catch(() => {}));
     return subs;
   } catch (err) {
     console.error('getDebateSubmissions error:', err);
@@ -97,8 +93,6 @@ export async function getVerdict(debateId: string): Promise<Verdict | null> {
     if (!result) return null;
     const raw = typeof result === 'string' ? JSON.parse(result) : result;
     const verdict = raw as Verdict;
-    // Sync verdict to Supabase cache in background
-    cacheVerdict(verdict).catch(() => {});
     return verdict;
   } catch (err) {
     console.error('getVerdict error:', err);
@@ -124,7 +118,6 @@ export async function getUserDebates(address: string): Promise<Debate[]> {
       const raw = typeof result === 'string' ? JSON.parse(result) : result;
       const debates: Debate[] = Array.isArray(raw) ? raw : [];
       if (debates.length > 0) {
-        debates.forEach((d) => cacheDebate(d).catch(() => {}));
         return debates;
       }
     } catch (err) {
@@ -145,7 +138,6 @@ export async function getReputation(address: string): Promise<UserReputation | n
     if (!result) return null;
     const raw = typeof result === 'string' ? JSON.parse(result) : result;
     const reputation = raw as UserReputation;
-    cacheProfile(reputation).catch(() => {});
     return reputation;
   } catch (err) {
     console.error('getReputation error:', err);
@@ -201,25 +193,6 @@ export async function createDebate(
     args: [debateId, debateJson],
     value: 0n,
   });
-
-  // Immediately cache an optimistic entry so it appears in the public list
-  const optimisticDebate: Debate = {
-    debate_id: debateId,
-    creator: account,
-    opponent: '0x0000000000000000000000000000000000000000',
-    topic: input.topic,
-    side_a_label: input.side_a_label,
-    side_b_label: input.side_b_label,
-    debate_type: input.debate_type,
-    status: 'CREATED',
-    rounds_required: input.rounds_required,
-    word_limit: input.word_limit,
-    evidence_required: input.evidence_required,
-    rules_json: input.rules,
-    created_at: Date.now(),
-    finalized: false,
-  };
-  cacheDebate(optimisticDebate).catch(() => {});
 
   return hash as `0x${string}`;
 }

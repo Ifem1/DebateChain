@@ -15,7 +15,7 @@ DebateChain is not an off-chain advice app. The contract is the source of truth 
 - verdict storage
 - participant reputation updates
 
-Supabase is used only as a public index/cache for faster browsing. It must never decide winners or mutate verdicts.
+There is no off-chain debate cache. The frontend reads contract state directly from GenLayer.
 
 ## Current Evidence Model
 
@@ -46,7 +46,7 @@ Main write methods:
 - React 19
 - TypeScript
 - GenLayer JS SDK
-- Supabase cache/index tables
+- Contract-only state reads
 
 ## Local Setup
 
@@ -65,15 +65,6 @@ NEXT_PUBLIC_CONTRACT_ADDRESS=0x0ba22266e0ABBCa2E2e162d8905C11a31B0e0af1
 NEXT_PUBLIC_GENLAYER_RPC=https://studio.genlayer.com/api
 NEXT_PUBLIC_GENLAYER_EXPLORER=https://explorer-studio.genlayer.com
 ```
-
-Optional Supabase cache:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=https://yourproject.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-```
-
-Apply the schema in `supabase/schema.sql` if using Supabase.
 
 ## Tests
 
@@ -100,7 +91,6 @@ For reviewer clarity, submit the full repository with:
 
 - the contract source
 - frontend source
-- Supabase schema
 - test runner and suites
 - deployment/config instructions
 

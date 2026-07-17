@@ -9,7 +9,7 @@ import { OnChainStatusBadge } from '@/components/ui/OnChainStatusBadge';
 
 const NAV_LINKS = [
   { href: '/debates', label: 'Arena' },
-  { href: '/leaderboard', label: 'Rankings' },
+  { href: '/leaderboard', label: 'Reputation' },
   { href: '/about', label: 'About' },
 ];
 

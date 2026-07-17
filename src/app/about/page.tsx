@@ -116,7 +116,7 @@ export default function AboutPage() {
             { layer: 'Frontend', tech: 'Next.js 16 · TypeScript · Tailwind CSS', accent: '#ef8aff' },
             { layer: 'Judgement', tech: 'GenLayer Intelligent Contract · Python', accent: '#bf5af2' },
             { layer: 'Wallet', tech: 'Injected Wallet (MetaMask)', accent: '#d946ef' },
-            { layer: 'Indexing', tech: 'Supabase (cache only — never source of truth)', accent: '#7a6490' },
+            { layer: 'State', tech: 'GenLayer contract reads and writes only', accent: '#7a6490' },
           ].map((item) => (
             <div key={item.layer} style={{
               padding: '18px 20px', borderRadius: 12,
@@ -140,7 +140,7 @@ export default function AboutPage() {
           {[
             'GenLayer is the source of truth for all verdicts.',
             'No fake winners, fake scores, or off-chain judgement.',
-            'Supabase only caches on-chain data — it never decides results.',
+            'No off-chain cache is used for debate state or verdicts.',
             'Contract calls (not token transfers) are used for all write actions.',
             'Fallacies are identified specifically, not generically.',
             'Submitted evidence is evaluated for relevance, not just existence.',

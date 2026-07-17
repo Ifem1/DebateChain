@@ -4,9 +4,6 @@ export const GENLAYER_RPC = process.env.NEXT_PUBLIC_GENLAYER_RPC || 'https://stu
 
 export const GENLAYER_EXPLORER = process.env.NEXT_PUBLIC_GENLAYER_EXPLORER || 'https://explorer-studio.genlayer.com';
 
-export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
 export const DEBATE_STATUS_LABELS: Record<string, string> = {
   CREATED: 'Open',
   ACCEPTED: 'Active',

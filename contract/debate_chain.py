@@ -1,4 +1,3 @@
-# v0.2.20
 # { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
 
 from genlayer import *
@@ -302,8 +301,11 @@ Return ONLY this JSON object:
   "judge_notice": "Any caveats about this judgement."
 }}"""
 
+        def get_prompt() -> str:
+            return prompt
+
         result = gl.eq_principle.prompt_non_comparative(
-            input=prompt,
+            get_prompt,
             task="Judge a structured debate between two participants and return a verdict JSON with winner, scores, fallacies, and reasoning.",
             criteria="The verdict must be fair, evidence-based, and identify specific logical fallacies. It must return strict JSON only."
         )

@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { getUserDebates, getProtocolState } from '@/lib/genlayer';
-import { listDebatesCached } from '@/lib/supabase';
+import { getProtocolState, getUserDebates } from '@/lib/genlayer';
 import { useWallet } from '@/providers/WalletProvider';
 import type { Debate, DebateStatus } from '@/types/debate';
 import { DebateCard } from '@/components/debate/DebateCard';
@@ -21,69 +20,55 @@ const FILTER_OPTIONS: { value: DebateStatus | 'ALL'; label: string }[] = [
   { value: 'FINALIZED', label: 'Finalized' },
 ];
 
-type ViewMode = 'all' | 'mine';
-
 export default function DebatesPage() {
   const { address, isConnected } = useWallet();
-  const [allDebates, setAllDebates] = useState<Debate[]>([]);
-  const [myDebates, setMyDebates] = useState<Debate[]>([]);
+  const [debates, setDebates] = useState<Debate[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<DebateStatus | 'ALL'>('ALL');
   const [search, setSearch] = useState('');
-  const [view, setView] = useState<ViewMode>('all');
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [lookupId, setLookupId] = useState('');
 
-  const loadAll = useCallback(async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [cached, onChain, state] = await Promise.all([
-        listDebatesCached(100),
+      const [walletDebates, state] = await Promise.all([
         address ? getUserDebates(address) : Promise.resolve([] as Debate[]),
         getProtocolState(),
       ]);
-
-      const merged = new Map<string, Debate>();
-      cached.forEach((d) => merged.set(d.debate_id, d));
-      onChain.forEach((d) => merged.set(d.debate_id, d));
-      setAllDebates(Array.from(merged.values()).sort((a, b) => b.created_at - a.created_at));
-      setMyDebates(onChain);
-      if (state) setTotalCount(state.debate_count);
+      setDebates(walletDebates.sort((a, b) => b.created_at - a.created_at));
+      setTotalCount(state?.debate_count ?? null);
     } catch (err) {
-      console.error('[DebateChain] loadAll error:', err);
+      console.error('[DebateChain] load error:', err);
     } finally {
       setLoading(false);
     }
   }, [address]);
 
   useEffect(() => {
-    void Promise.resolve().then(() => loadAll());
-  }, [loadAll]);
-
-  const debates = view === 'all' ? allDebates : myDebates;
+    void Promise.resolve().then(() => load());
+  }, [load]);
 
   const filtered = debates.filter((d) => {
     const matchStatus = filter === 'ALL' || d.status === filter;
+    const query = search.toLowerCase();
     const matchSearch =
-      !search ||
-      d.topic.toLowerCase().includes(search.toLowerCase()) ||
-      d.side_a_label.toLowerCase().includes(search.toLowerCase()) ||
-      d.side_b_label.toLowerCase().includes(search.toLowerCase()) ||
-      d.debate_id.toLowerCase().includes(search.toLowerCase());
+      !query ||
+      d.topic.toLowerCase().includes(query) ||
+      d.side_a_label.toLowerCase().includes(query) ||
+      d.side_b_label.toLowerCase().includes(query) ||
+      d.debate_id.toLowerCase().includes(query);
     return matchStatus && matchSearch;
   });
 
   const handleLookup = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!lookupId.trim()) return;
-    window.location.href = `/debates/${lookupId.trim()}`;
+    const id = lookupId.trim();
+    if (id) window.location.href = `/debates/${id}`;
   };
-
-  const handleRefresh = () => { loadAll(); };
 
   return (
     <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px' }}>
-      {/* Header */}
       <div
         style={{
           display: 'flex',
@@ -100,14 +85,15 @@ export default function DebatesPage() {
           </h1>
           <p style={{ fontSize: 15, color: '#64748b', margin: 0 }}>
             {totalCount !== null
-              ? `${totalCount} debate${totalCount !== 1 ? 's' : ''} on GenLayer`
+              ? `${totalCount} debate${totalCount !== 1 ? 's' : ''} on the active GenLayer contract`
               : 'AI-judged, on-chain debates'}
-            {allDebates.length > 0 && totalCount !== null && allDebates.length < totalCount
-              ? ` · ${allDebates.length} indexed`
-              : ''}
-            {!isConnected && totalCount !== null && allDebates.length < totalCount && (
+            {isConnected ? (
               <span style={{ fontSize: 12, color: '#475569', marginLeft: 8 }}>
-                · connect wallet or paste a debate ID below to access all
+                - showing records for your connected wallet
+              </span>
+            ) : (
+              <span style={{ fontSize: 12, color: '#475569', marginLeft: 8 }}>
+                - connect wallet or paste a debate ID to load contract records
               </span>
             )}
           </p>
@@ -130,11 +116,10 @@ export default function DebatesPage() {
         </Link>
       </div>
 
-      {/* Jump to debate by ID */}
       <form onSubmit={handleLookup} style={{ marginBottom: 24, display: 'flex', gap: 10 }}>
         <input
           type="text"
-          placeholder="Jump to debate by ID…"
+          placeholder="Jump to debate by ID..."
           value={lookupId}
           onChange={(e) => setLookupId(e.target.value)}
           style={{
@@ -162,49 +147,19 @@ export default function DebatesPage() {
             whiteSpace: 'nowrap',
           }}
         >
-          Go →
+          Go
         </button>
       </form>
 
-      {/* View toggle + search + filters */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
-        {/* All / Mine toggle */}
-        <div
-          style={{
-            display: 'flex',
-            borderRadius: 8,
-            overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,0.1)',
-            flexShrink: 0,
-          }}
-        >
-          {(['all', 'mine'] as ViewMode[]).map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              style={{
-                padding: '8px 18px',
-                fontSize: 13,
-                fontWeight: 600,
-                color: view === v ? '#fff' : '#64748b',
-                background: view === v ? 'rgba(37,99,235,0.25)' : 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              {v === 'all' ? 'All Debates' : 'My Debates'}
-            </button>
-          ))}
-        </div>
-
         <input
           type="text"
-          placeholder="Search…"
+          placeholder="Search your wallet debates..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
             flex: 1,
-            minWidth: 160,
+            minWidth: 220,
             padding: '9px 14px',
             borderRadius: 8,
             fontSize: 14,
@@ -216,7 +171,7 @@ export default function DebatesPage() {
         />
 
         <button
-          onClick={handleRefresh}
+          onClick={load}
           style={{
             padding: '9px 14px',
             borderRadius: 8,
@@ -229,10 +184,9 @@ export default function DebatesPage() {
             flexShrink: 0,
           }}
         >
-          ↻ Refresh
+          Refresh
         </button>
 
-        {/* Status filters */}
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {FILTER_OPTIONS.map((f) => (
             <button
@@ -255,8 +209,7 @@ export default function DebatesPage() {
         </div>
       </div>
 
-      {/* "My Debates" requires wallet */}
-      {view === 'mine' && !isConnected && (
+      {!isConnected && (
         <div
           className="card"
           style={{
@@ -270,33 +223,29 @@ export default function DebatesPage() {
             marginBottom: 24,
           }}
         >
-          <div style={{ fontSize: 36 }}>🔐</div>
+          <div style={{ fontSize: 36 }}>Lock</div>
           <h3 style={{ fontSize: 18, fontWeight: 600, color: '#e2e8f0', margin: 0 }}>
-            Connect wallet to see your debates
+            Connect wallet to load your on-chain debates
           </h3>
+          <p style={{ fontSize: 13, color: '#64748b', margin: 0, maxWidth: 520 }}>
+            DebateChain no longer uses an off-chain public index. Known debates can still be opened directly by ID.
+          </p>
           <WalletConnectButton />
         </div>
       )}
 
-      {/* Results grid */}
       {loading ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
-          {[...Array(6)].map((_, i) => (
+          {[...Array(3)].map((_, i) => (
             <div key={i} className="card shimmer" style={{ height: 160 }} />
           ))}
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          title={
-            view === 'mine' && myDebates.length === 0
-              ? 'No debates yet'
-              : 'No matches'
-          }
+          title={debates.length === 0 ? 'No wallet debates found' : 'No matches'}
           description={
-            view === 'mine' && myDebates.length === 0
-              ? 'You have not created or joined any debates.'
-              : view === 'all' && allDebates.length === 0
-              ? 'No debates have been indexed yet. Create the first one!'
+            debates.length === 0
+              ? 'Create or join a debate with this wallet, or paste a known debate ID above.'
               : 'Try adjusting your filters or search.'
           }
           action={

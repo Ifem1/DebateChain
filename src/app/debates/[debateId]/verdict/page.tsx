@@ -55,7 +55,7 @@ export default function VerdictPage() {
     setLoading(true);
     setError(null);
     try {
-      // Always read from GenLayer — never from local state or Supabase cache for display
+      // Always read verdicts from GenLayer.
       const [v, d] = await Promise.all([
         getVerdict(debateId),
         getDebate(debateId),

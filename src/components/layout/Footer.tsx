@@ -47,7 +47,7 @@ export function Footer() {
               {[
                 { href: '/debates', label: 'Arena' },
                 { href: '/debates/new', label: 'Start Debate' },
-                { href: '/leaderboard', label: 'Rankings' },
+                { href: '/leaderboard', label: 'Reputation' },
               ].map(l => (
                 <div key={l.href} style={{ marginBottom: 8 }}>
                   <Link href={l.href} style={{ fontSize: 13, color: '#7a6490', textDecoration: 'none' }}>{l.label}</Link>
