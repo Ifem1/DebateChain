@@ -127,6 +127,40 @@ export async function getUserDebates(address: string): Promise<Debate[]> {
   return [];
 }
 
+export async function getDebates(offset = 0, limit = 100): Promise<Debate[]> {
+  try {
+    const client = getReadClient();
+    const result = await client.readContract({
+      address: CONTRACT_ADDRESS as `0x${string}`,
+      functionName: 'get_debates',
+      args: [BigInt(offset), BigInt(limit)],
+    });
+    if (!result) return [];
+    const raw = typeof result === 'string' ? JSON.parse(result) : result;
+    return Array.isArray(raw) ? raw : [];
+  } catch (err) {
+    console.error('getDebates error:', err);
+    return [];
+  }
+}
+
+export async function getDebateIds(): Promise<string[]> {
+  try {
+    const client = getReadClient();
+    const result = await client.readContract({
+      address: CONTRACT_ADDRESS as `0x${string}`,
+      functionName: 'get_debate_ids',
+      args: [],
+    });
+    if (!result) return [];
+    const raw = typeof result === 'string' ? JSON.parse(result) : result;
+    return Array.isArray(raw) ? raw : [];
+  } catch (err) {
+    console.error('getDebateIds error:', err);
+    return [];
+  }
+}
+
 export async function getReputation(address: string): Promise<UserReputation | null> {
   try {
     const client = getReadClient();

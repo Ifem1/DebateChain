@@ -152,6 +152,11 @@ async function run() {
   }
   log(`debate_count increased ✓`);
 
+  const publicDebates = await view(creator, 'get_debates', [0n, 100n]);
+  const publicMatch = Array.isArray(publicDebates) && publicDebates.find(d => d.debate_id === debateId);
+  if (!publicMatch) throw new Error('ASSERT FAILED: debate not found in get_debates public list');
+  log('public debate list contains new debate ok');
+
   // ── Return debate ID for suite3 ───────────────────────────────────────────
   section('Suite 1 PASSED');
   log(`Ready-for-judgement debate: ${debateId}`);

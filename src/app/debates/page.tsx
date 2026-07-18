@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { getProtocolState, getUserDebates } from '@/lib/genlayer';
+import { getDebates, getProtocolState, getUserDebates } from '@/lib/genlayer';
 import { useWallet } from '@/providers/WalletProvider';
 import type { Debate, DebateStatus } from '@/types/debate';
 import { DebateCard } from '@/components/debate/DebateCard';
@@ -22,21 +22,25 @@ const FILTER_OPTIONS: { value: DebateStatus | 'ALL'; label: string }[] = [
 
 export default function DebatesPage() {
   const { address, isConnected } = useWallet();
-  const [debates, setDebates] = useState<Debate[]>([]);
+  const [allDebates, setAllDebates] = useState<Debate[]>([]);
+  const [myDebates, setMyDebates] = useState<Debate[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<DebateStatus | 'ALL'>('ALL');
   const [search, setSearch] = useState('');
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [lookupId, setLookupId] = useState('');
+  const [view, setView] = useState<'all' | 'mine'>('all');
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [walletDebates, state] = await Promise.all([
+      const [publicDebates, walletDebates, state] = await Promise.all([
+        getDebates(0, 100),
         address ? getUserDebates(address) : Promise.resolve([] as Debate[]),
         getProtocolState(),
       ]);
-      setDebates(walletDebates.sort((a, b) => b.created_at - a.created_at));
+      setAllDebates(publicDebates.sort((a, b) => b.created_at - a.created_at));
+      setMyDebates(walletDebates.sort((a, b) => b.created_at - a.created_at));
       setTotalCount(state?.debate_count ?? null);
     } catch (err) {
       console.error('[DebateChain] load error:', err);
@@ -48,6 +52,8 @@ export default function DebatesPage() {
   useEffect(() => {
     void Promise.resolve().then(() => load());
   }, [load]);
+
+  const debates = view === 'all' ? allDebates : myDebates;
 
   const filtered = debates.filter((d) => {
     const matchStatus = filter === 'ALL' || d.status === filter;
@@ -87,9 +93,13 @@ export default function DebatesPage() {
             {totalCount !== null
               ? `${totalCount} debate${totalCount !== 1 ? 's' : ''} on the active GenLayer contract`
               : 'AI-judged, on-chain debates'}
-            {isConnected ? (
+            {view === 'mine' && isConnected ? (
               <span style={{ fontSize: 12, color: '#475569', marginLeft: 8 }}>
-                - showing records for your connected wallet
+                - showing debates for your connected wallet
+              </span>
+            ) : view === 'all' ? (
+              <span style={{ fontSize: 12, color: '#475569', marginLeft: 8 }}>
+                - showing public contract records
               </span>
             ) : (
               <span style={{ fontSize: 12, color: '#475569', marginLeft: 8 }}>
@@ -152,9 +162,40 @@ export default function DebatesPage() {
       </form>
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div
+          style={{
+            display: 'flex',
+            borderRadius: 8,
+            overflow: 'hidden',
+            border: '1px solid rgba(255,255,255,0.1)',
+            flexShrink: 0,
+          }}
+        >
+          {[
+            { value: 'all' as const, label: 'All Debates' },
+            { value: 'mine' as const, label: 'My Debates' },
+          ].map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setView(option.value)}
+              style={{
+                padding: '8px 18px',
+                fontSize: 13,
+                fontWeight: 600,
+                color: view === option.value ? '#fff' : '#64748b',
+                background: view === option.value ? 'rgba(37,99,235,0.25)' : 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
         <input
           type="text"
-          placeholder="Search your wallet debates..."
+          placeholder={view === 'all' ? 'Search all debates...' : 'Search your wallet debates...'}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
@@ -209,7 +250,7 @@ export default function DebatesPage() {
         </div>
       </div>
 
-      {!isConnected && (
+      {view === 'mine' && !isConnected && (
         <div
           className="card"
           style={{
@@ -242,10 +283,12 @@ export default function DebatesPage() {
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          title={debates.length === 0 ? 'No wallet debates found' : 'No matches'}
+          title={debates.length === 0 ? (view === 'all' ? 'No debates found' : 'No wallet debates found') : 'No matches'}
           description={
             debates.length === 0
-              ? 'Create or join a debate with this wallet, or paste a known debate ID above.'
+              ? view === 'all'
+                ? 'Create the first debate on this contract, or refresh after a new deployment finishes indexing on-chain state.'
+                : 'Create or join a debate with this wallet, or paste a known debate ID above.'
               : 'Try adjusting your filters or search.'
           }
           action={

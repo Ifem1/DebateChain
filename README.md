@@ -26,7 +26,7 @@ If a URL is missing, invalid, unreachable, or too dynamic for consensus, the ver
 ## Contract
 
 - Contract source: `contract/debate_chain.py`
-- Default deployed Studionet contract used by tests: `0x0ba22266e0ABBCa2E2e162d8905C11a31B0e0af1`
+- Default deployed Studionet contract used by tests: `0xfC8840bF2B5B4eBdc884B8EE700Cc8C77714d3a7`
 - Frontend contract address is configured with `NEXT_PUBLIC_CONTRACT_ADDRESS`
 
 Main write methods:
@@ -39,6 +39,17 @@ Main write methods:
 - `judge_debate(debate_id)`
 - `dispute_verdict(debate_id, dispute_id, dispute_json)`
 - `finalize_debate(debate_id)`
+
+Main view methods:
+
+- `get_debate(debate_id)`
+- `get_debates(offset, limit)`
+- `get_debate_ids()`
+- `get_user_debates(address)`
+- `get_debate_submissions(debate_id)`
+- `get_verdict(debate_id)`
+- `get_reputation(address)`
+- `get_protocol_state()`
 
 ## App Stack
 
@@ -61,7 +72,7 @@ Then open `http://localhost:3000`.
 Required frontend environment:
 
 ```bash
-NEXT_PUBLIC_CONTRACT_ADDRESS=0x0ba22266e0ABBCa2E2e162d8905C11a31B0e0af1
+NEXT_PUBLIC_CONTRACT_ADDRESS=0xfC8840bF2B5B4eBdc884B8EE700Cc8C77714d3a7
 NEXT_PUBLIC_GENLAYER_RPC=https://studio.genlayer.com/api
 NEXT_PUBLIC_GENLAYER_EXPLORER=https://explorer-studio.genlayer.com
 ```
@@ -74,7 +85,7 @@ The e2e tests use real GenLayer wallets from environment variables. Private keys
 $env:PK_CREATOR_1="0x..."
 $env:PK_JOINER_1="0x..."
 $env:PK_JOINER_2="0x..."
-$env:CONTRACT_ADDRESS="0x0ba22266e0ABBCa2E2e162d8905C11a31B0e0af1"
+$env:CONTRACT_ADDRESS="0xfC8840bF2B5B4eBdc884B8EE700Cc8C77714d3a7"
 
 node test-all.mjs 1
 node test-all.mjs 2

@@ -29,6 +29,7 @@ class DebateChain(gl.Contract):
         self.user_debates = TreeMap()
         self.reputation = TreeMap()
         self.protocol_state = TreeMap()
+        self.protocol_state["all_debate_ids"] = json.dumps([])
 
     # ─── Write Functions ──────────────────────────────────────────────────────
 
@@ -42,6 +43,7 @@ class DebateChain(gl.Contract):
             raise gl.vm.UserError("debate already exists")
 
         data = json.loads(debate_json)
+        data["debate_id"] = debate_id
         data["status"] = "CREATED"
         data["creator"] = str(gl.message.sender_address)
         data["finalized"] = False
@@ -50,6 +52,11 @@ class DebateChain(gl.Contract):
         self.debates[debate_id] = json.dumps(data)
         self.debate_count = self.debate_count + u256(1)
         self.debate_submissions[debate_id] = json.dumps([])
+
+        all_debate_ids = json.loads(self.protocol_state.get("all_debate_ids") or "[]")
+        if debate_id not in all_debate_ids:
+            all_debate_ids.append(debate_id)
+        self.protocol_state["all_debate_ids"] = json.dumps(all_debate_ids)
 
         addr = str(gl.message.sender_address)
         existing = json.loads(self.user_debates.get(addr) or "[]")
@@ -417,6 +424,25 @@ Return ONLY this JSON object:
         debate_ids = json.loads(self.user_debates.get(address) or "[]")
         result = []
         for did in debate_ids:
+            raw = self.debates.get(did)
+            if raw:
+                result.append(json.loads(raw))
+        return json.dumps(result)
+
+    @gl.public.view
+    def get_debate_ids(self) -> str:
+        return self.protocol_state.get("all_debate_ids") or "[]"
+
+    @gl.public.view
+    def get_debates(self, offset: u256, limit: u256) -> str:
+        debate_ids = json.loads(self.protocol_state.get("all_debate_ids") or "[]")
+        start = int(offset)
+        max_items = int(limit)
+        if max_items <= 0:
+            return json.dumps([])
+        end = start + max_items
+        result = []
+        for did in debate_ids[start:end]:
             raw = self.debates.get(did)
             if raw:
                 result.append(json.loads(raw))
